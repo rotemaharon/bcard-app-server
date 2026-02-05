@@ -1,5 +1,3 @@
-ואז לכתוב את זה ?
-
 # Business Card App - REST API Server 🚀
 
 This is the backend server for a Business Card application, built with **Node.js**, **Express**, and **MongoDB**.
