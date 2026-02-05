@@ -80,6 +80,16 @@ The application provides a RESTful API for managing users and business cards, in
 - `PATCH /api/cards/:id/bizNumber` - Update BizNumber (Admin only)
 - `DELETE /api/cards/:id` - Delete card
 
----
+## 🧪 Test Users (Initial Data)
+
+The server automatically creates the following users on the first run.
+You can use them to test the API immediately via Postman/Client.
+
+**Common Password for all users:** `Aa123456!`
+
+| Role | Email | Permissions |
+| **Admin** | `admin@test.com` | Can manage users, block users, change bizNumbers. |
+| **Business** | `business@test.com` | Can create, edit, and delete their own cards. |
+| **Regular** | `user@test.com` | Can search cards and "like" cards. |
 
 **Created by:** Rotem Aharon
