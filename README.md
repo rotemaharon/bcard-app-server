@@ -1,9 +1,9 @@
-# Business Card App - REST API Server 🚀
+# Business Card App - REST API Server 
 
 This is the backend server for a Business Card application, built with **Node.js**, **Express**, and **MongoDB**.
 The application provides a RESTful API for managing users and business cards, including authentication, authorization, and data validation.
 
-## ✨ Features
+## Features
 
 - **User Management:** Register, Login, User Profile, Edit Profile.
 - **Card Management:** Create Business Cards, View All, View My Cards, Edit, Delete, Like.
@@ -13,13 +13,13 @@ The application provides a RESTful API for managing users and business cards, in
       \* Protected Routes (Middleware).
 - **Data Validation:** Using **Joi** for strict input validation.
 
-### 🏆 Bonuses Implemented
+###  Bonuses Implemented
 
 1.  **BizNumber Management:** Admin users can update a card's business number (with validation for uniqueness).
 2.  **Account Lockout:** Users are locked out for 24 hours after 3 failed login attempts.
 3.  **File Logger:** Automatic error logging to a daily log file (in `/logs`) for server errors (status 400+).
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - Node.js
 - Express.js
@@ -30,7 +30,7 @@ The application provides a RESTful API for managing users and business cards, in
 - Morgan (Logger)
 - Cors
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
 1.  **Clone the repository:**
     `bash
@@ -57,7 +57,7 @@ The application provides a RESTful API for managing users and business cards, in
     npm start
     `
 
-## 📚 API Endpoints Overview
+## API Endpoints Overview
 
 ### Users
 
@@ -80,7 +80,7 @@ The application provides a RESTful API for managing users and business cards, in
 - `PATCH /api/cards/:id/bizNumber` - Update BizNumber (Admin only)
 - `DELETE /api/cards/:id` - Delete card
 
-## 🧪 Test Users (Initial Data)
+## Test Users (Initial Data)
 
 The server automatically creates the following users on the first run.
 You can use them to test the API immediately via Postman/Client.
