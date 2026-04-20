@@ -1,98 +1,76 @@
-# Business Card App - REST API Server
+# BCard App - Server
 
-Backend server for a Business Card application, built with **Node.js**, **Express**, and **MongoDB**. The application provides a RESTful API for managing users and business cards, with authentication, authorization, validation, and logging.
+פרויקט סיום מודול Node.js - שרת REST API לאפליקציית כרטיסי ביקור.
 
-## Features
+## התקנה
 
-- **User Management:** Register, Login, Get Profile, Edit, Toggle Business Status, Delete.
-- **Card Management:** Create, Read All, Read My Cards, Edit, Like/Unlike, Delete.
-- **Security:**
-  - JWT authentication
-  - Bcryptjs password hashing
-  - Protected routes (auth middleware)
-- **Data Validation:** Joi schemas for all inputs.
-- **Logging:** Morgan for request logging, custom file logger for errors.
-- **Two environments:** Local MongoDB and MongoDB Atlas (via `.env`).
+1. להתקין את החבילות:
 
-## Bonuses Implemented
+```bash
+npm install
+```
 
-1. **BizNumber Management** — Admin users can change a card's business number, with uniqueness validation.
-2. **File Logger** — Every request returning status ≥ 400 is appended to a daily log file under `/logs`.
-3. **Account Lockout** — After 3 consecutive failed login attempts, the account is locked for 24 hours.
+2. ליצור קובץ `.env` בתיקייה הראשית עם הערכים הבאים:
 
-## Tech Stack
+```
+PORT=8000
+DB=mongodb_connection_string
+JWTKEY=your_secret_key
+```
 
-Node.js, Express.js, MongoDB (Mongoose), JWT, Bcryptjs, Joi, Morgan, Cors, Dotenv.
+3. להריץ את השרת:
 
-## Installation & Setup
+```bash
+npm start
+```
 
-1. Clone the repository:
+בהרצה הראשונה נוצרים אוטומטית 3 משתמשים ו-3 כרטיסים לבדיקה.
 
-   ```bash
-   git clone <YOUR_REPO_URL>
-   cd bcard-app-server
-   ```
+## משתמשים לבדיקה
 
-2. Install dependencies:
+סיסמה לכולם: `Aa123456!`
 
-   ```bash
-   npm install
-   ```
+| סוג משתמש | אימייל |
+| --- | --- |
+| רגיל | user@test.com |
+| עסקי | business@test.com |
+| אדמין | admin@test.com |
 
-3. Create a `.env` file in the project root with:
+## Endpoints
 
-   ```env
-   PORT=8000
-   DB=your_mongodb_connection_string
-   JWTKEY=your_secret_key
-   ```
+### Users
 
-4. Run the server:
+| Method | URL | Auth |
+| --- | --- | --- |
+| POST | /api/users | הרשמה |
+| POST | /api/users/login | התחברות |
+| GET | /api/users | אדמין |
+| GET | /api/users/:id | משתמש/אדמין |
+| PUT | /api/users/:id | משתמש |
+| PATCH | /api/users/:id | משתמש |
+| DELETE | /api/users/:id | משתמש/אדמין |
 
-   ```bash
-   npm start
-   ```
+### Cards
 
-   On the first run, initial users and cards will be seeded automatically.
+| Method | URL | Auth |
+| --- | --- | --- |
+| GET | /api/cards | all |
+| GET | /api/cards/my-cards | משתמש רשום |
+| GET | /api/cards/:id | all |
+| POST | /api/cards | משתמש עסקי |
+| PUT | /api/cards/:id | יוצר הכרטיס |
+| PATCH | /api/cards/:id | משתמש רשום (לייק) |
+| PATCH | /api/cards/:id/bizNumber | אדמין (בונוס) |
+| DELETE | /api/cards/:id | יוצר הכרטיס/אדמין |
 
-## API Endpoints
+כל בקשה מוגנת דורשת כותרת `x-auth-token` עם הטוקן מ-login.
 
-### Users (`/api/users`)
+## בונוסים
 
-| Method | Path      | Auth                     | Action                 |
-| ------ | --------- | ------------------------ | ---------------------- |
-| POST   | `/`       | Public                   | Register a new user    |
-| POST   | `/login`  | Public                   | Login, returns JWT     |
-| GET    | `/`       | Admin                    | Get all users          |
-| GET    | `/:id`    | The user or Admin        | Get user by id         |
-| PUT    | `/:id`    | The user                 | Edit user              |
-| PATCH  | `/:id`    | The user                 | Toggle `isBusiness`    |
-| DELETE | `/:id`    | The user or Admin        | Delete user            |
+- שינוי bizNumber על ידי אדמין (עם בדיקה שהמספר פנוי)
+- חסימת משתמש ל-24 שעות אחרי 3 ניסיונות התחברות כושלים
+- File logger - כל תגובה עם סטאטוס 400+ נשמרת בקובץ log יומי בתיקיית `logs`
 
-### Cards (`/api/cards`)
+## טכנולוגיות
 
-| Method | Path                 | Auth                    | Action                         |
-| ------ | -------------------- | ----------------------- | ------------------------------ |
-| GET    | `/`                  | Public                  | Get all cards                  |
-| GET    | `/my-cards`          | Registered user         | Get cards owned by the user    |
-| GET    | `/:id`               | Public                  | Get card by id                 |
-| POST   | `/`                  | Business user           | Create a new card              |
-| PUT    | `/:id`               | Card owner              | Edit card                      |
-| PATCH  | `/:id`               | Registered user         | Like / Unlike card             |
-| PATCH  | `/:id/bizNumber`     | Admin                   | Update card's bizNumber (bonus)|
-| DELETE | `/:id`               | Card owner or Admin     | Delete card                    |
-
-All authenticated routes require an `x-auth-token` header containing the JWT returned from `/api/users/login`.
-
-## Test Users (seeded on first run)
-
-Password for all three: `Aa123456!`
-
-| Role     | Email               | Permissions                                           |
-| -------- | ------------------- | ----------------------------------------------------- |
-| Regular  | `user@test.com`     | Browse cards, like cards                              |
-| Business | `business@test.com` | Create, edit, and delete own cards                    |
-| Admin    | `admin@test.com`    | Full access, can manage users and change bizNumbers   |
-
-
-**Author:** Rotem Aharon
+Node.js, Express, MongoDB (Mongoose), JWT, bcryptjs, Joi, Morgan, Cors, Dotenv.
