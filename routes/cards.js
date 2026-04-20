@@ -30,6 +30,10 @@ const cardSchema = joi.object({
     .required(),
 });
 
+const bizNumberSchema = joi.object({
+  bizNumber: joi.number().min(1000000).max(9999999).required(),
+});
+
 const generateBizNumber = async () => {
   while (true) {
     const random = _.random(1000000, 9999999);
@@ -37,6 +41,15 @@ const generateBizNumber = async () => {
     if (!card) return random;
   }
 };
+
+router.get("/", async (req, res) => {
+  try {
+    const cards = await Card.find();
+    res.send(cards);
+  } catch (err) {
+    res.status(500).send("Server error");
+  }
+});
 
 router.get("/my-cards", auth, async (req, res) => {
   try {
@@ -57,19 +70,10 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
-  try {
-    const cards = await Card.find();
-    res.send(cards);
-  } catch (err) {
-    res.status(500).send("Server error");
-  }
-});
-
 router.post("/", auth, async (req, res) => {
   try {
     if (!req.payload.isBusiness)
-      return res.status(400).send("Access denied. Business users only.");
+      return res.status(403).send("Access denied. Business users only.");
 
     const { error } = cardSchema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -113,17 +117,18 @@ router.patch("/:id", auth, async (req, res) => {
     const card = await Card.findById(req.params.id);
     if (!card) return res.status(404).send("Card not found");
 
-    const cardLikes = card.likes.find((id) => id === req.payload._id);
+    const userId = req.payload._id;
+    const alreadyLiked = card.likes.some((id) => id.toString() === userId);
 
-    if (!cardLikes) {
-      card.likes.push(req.payload._id);
-      res.send("Card liked");
-    } else {
-      card.likes = card.likes.filter((id) => id !== req.payload._id);
-      res.send("Card unliked");
+    if (!alreadyLiked) {
+      card.likes.push(userId);
+      await card.save();
+      return res.send(card);
     }
 
+    card.likes = card.likes.filter((id) => id.toString() !== userId);
     await card.save();
+    res.send(card);
   } catch (err) {
     res.status(500).send("Server error");
   }
@@ -131,28 +136,23 @@ router.patch("/:id", auth, async (req, res) => {
 
 router.patch("/:id/bizNumber", auth, async (req, res) => {
   try {
-    [cite_start]; 
     if (!req.payload.isAdmin) {
       return res.status(403).send("Access denied. Admin only.");
     }
 
+    const { error } = bizNumberSchema.validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
     const { bizNumber } = req.body;
 
-    if (!bizNumber || bizNumber < 1000000 || bizNumber > 9999999) {
-      return res
-        .status(400)
-        .send("BizNumber must be between 1,000,000 and 9,999,999");
-    }
-
-    [cite_start]; 
-    const existingCard = await Card.findOne({ bizNumber: bizNumber });
+    const existingCard = await Card.findOne({ bizNumber });
     if (existingCard) {
       return res.status(400).send("This BizNumber is already taken.");
     }
 
     const card = await Card.findByIdAndUpdate(
       req.params.id,
-      { bizNumber: bizNumber },
+      { bizNumber },
       { new: true },
     );
 
@@ -173,7 +173,7 @@ router.delete("/:id", auth, async (req, res) => {
     }
 
     await Card.deleteOne({ _id: req.params.id });
-    res.send("Card deleted");
+    res.send(card);
   } catch (err) {
     res.status(500).send("Server error");
   }

@@ -1,95 +1,98 @@
-# Business Card App - REST API Server 🚀
+# Business Card App - REST API Server
 
-This is the backend server for a Business Card application, built with **Node.js**, **Express**, and **MongoDB**.
-The application provides a RESTful API for managing users and business cards, including authentication, authorization, and data validation.
+Backend server for a Business Card application, built with **Node.js**, **Express**, and **MongoDB**. The application provides a RESTful API for managing users and business cards, with authentication, authorization, validation, and logging.
 
-## ✨ Features
+## Features
 
-- **User Management:** Register, Login, User Profile, Edit Profile.
-- **Card Management:** Create Business Cards, View All, View My Cards, Edit, Delete, Like.
+- **User Management:** Register, Login, Get Profile, Edit, Toggle Business Status, Delete.
+- **Card Management:** Create, Read All, Read My Cards, Edit, Like/Unlike, Delete.
 - **Security:**
-      _ **JWT** Authentication.
-      _ **Bcryptjs** for password hashing.
-      \* Protected Routes (Middleware).
-- **Data Validation:** Using **Joi** for strict input validation.
+  - JWT authentication
+  - Bcryptjs password hashing
+  - Protected routes (auth middleware)
+- **Data Validation:** Joi schemas for all inputs.
+- **Logging:** Morgan for request logging, custom file logger for errors.
+- **Two environments:** Local MongoDB and MongoDB Atlas (via `.env`).
 
-### 🏆 Bonuses Implemented
+## Bonuses Implemented
 
-1.  **BizNumber Management:** Admin users can update a card's business number (with validation for uniqueness).
-2.  **Account Lockout:** Users are locked out for 24 hours after 3 failed login attempts.
-3.  **File Logger:** Automatic error logging to a daily log file (in `/logs`) for server errors (status 400+).
+1. **BizNumber Management** — Admin users can change a card's business number, with uniqueness validation.
+2. **File Logger** — Every request returning status ≥ 400 is appended to a daily log file under `/logs`.
+3. **Account Lockout** — After 3 consecutive failed login attempts, the account is locked for 24 hours.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- Node.js
-- Express.js
-- MongoDB (Mongoose)
-- JWT (JSON Web Token)
-- Bcryptjs
-- Joi
-- Morgan (Logger)
-- Cors
+Node.js, Express.js, MongoDB (Mongoose), JWT, Bcryptjs, Joi, Morgan, Cors, Dotenv.
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
-1.  **Clone the repository:**
-    `bash
-    git clone <YOUR_REPO_URL>
-    cd bcard-app-server
-    `
+1. Clone the repository:
 
-2.  **Install dependencies:**
-    `bash
-    npm install
-    `
+   ```bash
+   git clone <YOUR_REPO_URL>
+   cd bcard-app-server
+   ```
 
-3.  **Environment Variables:**
-    Create a `.env` file in the root directory. You need to provide the following variables:
-    `env
-    PORT=8000
-    DB=your_mongodb_connection_string
-    JWTKEY=your_secret_key
-    `
-    _(Note: The .env file is not included in this repo for security reasons)._
+2. Install dependencies:
 
-4.  **Run the server:**
-    `bash
-    npm start
-    `
+   ```bash
+   npm install
+   ```
 
-## 📚 API Endpoints Overview
+3. Create a `.env` file in the project root with:
 
-### Users
+   ```env
+   PORT=8000
+   DB=your_mongodb_connection_string
+   JWTKEY=your_secret_key
+   ```
 
-- `POST /api/users/register` - Register a new user
-- `POST /api/users/login` - Login (Returns JWT)
-- `GET /api/users/:id` - Get user details
-- `GET /api/users` - Get all users (Admin only)
-- `PUT /api/users/:id` - Edit user
-- `PATCH /api/users/:id` - Change `isBusiness` status
-- `DELETE /api/users/:id` - Delete user
+4. Run the server:
 
-### Cards
+   ```bash
+   npm start
+   ```
 
-- `GET /api/cards` - Get all cards
-- `GET /api/cards/my-cards` - Get user's cards
-- `GET /api/cards/:id` - Get specific card
-- `POST /api/cards` - Create a new card (Business users only)
-- `PUT /api/cards/:id` - Edit card
-- `PATCH /api/cards/:id` - Like/Unlike card
-- `PATCH /api/cards/:id/bizNumber` - Update BizNumber (Admin only)
-- `DELETE /api/cards/:id` - Delete card
+   On the first run, initial users and cards will be seeded automatically.
 
-## 🧪 Test Users (Initial Data)
+## API Endpoints
 
-The server automatically creates the following users on the first run.
-You can use them to test the API immediately via Postman/Client.
+### Users (`/api/users`)
 
-**Common Password for all users:** `Aa123456!`
+| Method | Path      | Auth                     | Action                 |
+| ------ | --------- | ------------------------ | ---------------------- |
+| POST   | `/`       | Public                   | Register a new user    |
+| POST   | `/login`  | Public                   | Login, returns JWT     |
+| GET    | `/`       | Admin                    | Get all users          |
+| GET    | `/:id`    | The user or Admin        | Get user by id         |
+| PUT    | `/:id`    | The user                 | Edit user              |
+| PATCH  | `/:id`    | The user                 | Toggle `isBusiness`    |
+| DELETE | `/:id`    | The user or Admin        | Delete user            |
 
-| Role | Email | Permissions |
-| **Admin** | `admin@test.com` | Can manage users, block users, change bizNumbers. |
-| **Business** | `business@test.com` | Can create, edit, and delete their own cards. |
-| **Regular** | `user@test.com` | Can search cards and "like" cards. |
+### Cards (`/api/cards`)
 
-**Created by:** Rotem Aharon
+| Method | Path                 | Auth                    | Action                         |
+| ------ | -------------------- | ----------------------- | ------------------------------ |
+| GET    | `/`                  | Public                  | Get all cards                  |
+| GET    | `/my-cards`          | Registered user         | Get cards owned by the user    |
+| GET    | `/:id`               | Public                  | Get card by id                 |
+| POST   | `/`                  | Business user           | Create a new card              |
+| PUT    | `/:id`               | Card owner              | Edit card                      |
+| PATCH  | `/:id`               | Registered user         | Like / Unlike card             |
+| PATCH  | `/:id/bizNumber`     | Admin                   | Update card's bizNumber (bonus)|
+| DELETE | `/:id`               | Card owner or Admin     | Delete card                    |
+
+All authenticated routes require an `x-auth-token` header containing the JWT returned from `/api/users/login`.
+
+## Test Users (seeded on first run)
+
+Password for all three: `Aa123456!`
+
+| Role     | Email               | Permissions                                           |
+| -------- | ------------------- | ----------------------------------------------------- |
+| Regular  | `user@test.com`     | Browse cards, like cards                              |
+| Business | `business@test.com` | Create, edit, and delete own cards                    |
+| Admin    | `admin@test.com`    | Full access, can manage users and change bizNumbers   |
+
+
+**Author:** Rotem Aharon

@@ -9,6 +9,6 @@ module.exports = (req, res, next) => {
     req.payload = jwt.verify(token, process.env.JWTKEY);
     next();
   } catch (error) {
-    res.status(400).send("Invalid token");
+    res.status(401).send("Invalid token");
   }
 };
