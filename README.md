@@ -1,76 +1,76 @@
 # BCard App - Server
 
-פרויקט סיום מודול Node.js - שרת REST API לאפליקציית כרטיסי ביקור.
+A REST API server for the BCard business card management application, built with Node.js and Express.
 
-## התקנה
+## Getting Started
 
-1. להתקין את החבילות:
-
-```bash
-npm install
-```
-
-2. ליצור קובץ `.env` בתיקייה הראשית עם הערכים הבאים:
-
-```
-PORT=8000
-DB=mongodb_connection_string
-JWTKEY=your_secret_key
-```
-
-3. להריץ את השרת:
+1. Install dependencies:
 
 ```bash
-npm start
+   npm install
 ```
 
-בהרצה הראשונה נוצרים אוטומטית 3 משתמשים ו-3 כרטיסים לבדיקה.
+2. Create a `.env` file in the root directory:
 
-## משתמשים לבדיקה
+```
+   PORT=8000
+   DB=your_mongodb_connection_string
+   JWTKEY=your_secret_key
+```
 
-סיסמה לכולם: `Aa123456!`
+3. Start the server:
 
-| סוג משתמש | אימייל |
-| --- | --- |
-| רגיל | user@test.com |
-| עסקי | business@test.com |
-| אדמין | admin@test.com |
+```bash
+   npm start
+```
+
+On first run, 3 users and 3 cards are created automatically for testing.
+
+## Test Users
+
+Password for all: `Aa123456!`
+
+| Role     | Email             |
+| -------- | ----------------- |
+| Regular  | user@test.com     |
+| Business | business@test.com |
+| Admin    | admin@test.com    |
 
 ## Endpoints
 
 ### Users
 
-| Method | URL | Auth |
-| --- | --- | --- |
-| POST | /api/users | הרשמה |
-| POST | /api/users/login | התחברות |
-| GET | /api/users | אדמין |
-| GET | /api/users/:id | משתמש/אדמין |
-| PUT | /api/users/:id | משתמש |
-| PATCH | /api/users/:id | משתמש |
-| DELETE | /api/users/:id | משתמש/אדמין |
+| Method | URL              | Auth                     |
+| ------ | ---------------- | ------------------------ |
+| POST   | /api/users       | Register                 |
+| POST   | /api/users/login | Login                    |
+| GET    | /api/users       | Admin only               |
+| GET    | /api/users/:id   | Registered user or Admin |
+| PUT    | /api/users/:id   | Registered user          |
+| PATCH  | /api/users/:id   | Registered user          |
+| DELETE | /api/users/:id   | Registered user or Admin |
 
 ### Cards
 
-| Method | URL | Auth |
-| --- | --- | --- |
-| GET | /api/cards | all |
-| GET | /api/cards/my-cards | משתמש רשום |
-| GET | /api/cards/:id | all |
-| POST | /api/cards | משתמש עסקי |
-| PUT | /api/cards/:id | יוצר הכרטיס |
-| PATCH | /api/cards/:id | משתמש רשום (לייק) |
-| PATCH | /api/cards/:id/bizNumber | אדמין (בונוס) |
-| DELETE | /api/cards/:id | יוצר הכרטיס/אדמין |
+| Method | URL                      | Auth                   |
+| ------ | ------------------------ | ---------------------- |
+| GET    | /api/cards               | All                    |
+| GET    | /api/cards/my-cards      | Registered user        |
+| GET    | /api/cards/:id           | All                    |
+| POST   | /api/cards               | Business user          |
+| PUT    | /api/cards/:id           | Card owner             |
+| PATCH  | /api/cards/:id           | Registered user (like) |
+| PATCH  | /api/cards/:id/bizNumber | Admin (bonus)          |
+| DELETE | /api/cards/:id           | Card owner or Admin    |
 
-כל בקשה מוגנת דורשת כותרת `x-auth-token` עם הטוקן מ-login.
+All protected routes require an `x-auth-token` header with the token received from login.
 
-## בונוסים
+## Bonus Features
 
-- שינוי bizNumber על ידי אדמין (עם בדיקה שהמספר פנוי)
-- חסימת משתמש ל-24 שעות אחרי 3 ניסיונות התחברות כושלים
-- File logger - כל תגובה עם סטאטוס 400+ נשמרת בקובץ log יומי בתיקיית `logs`
+- Admin can change a card's bizNumber (validates uniqueness)
+- User account locks for 24 hours after 3 failed login attempts
+- File logger saves all 400+ responses to a daily log file in the `logs` directory
 
-## טכנולוגיות
+## Tech Stack
 
-Node.js, Express, MongoDB (Mongoose), JWT, bcryptjs, Joi, Morgan, Cors, Dotenv.
+Node.js, Express, MongoDB, Mongoose, JWT, bcryptjs, Joi, Morgan, Cors, Dotenv

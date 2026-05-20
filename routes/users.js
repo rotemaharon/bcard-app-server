@@ -5,7 +5,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const auth = require("../middleware/auth");
-const _ = require("lodash");
 
 const registerSchema = joi.object({
   name: joi
@@ -46,7 +45,6 @@ const updateSchema = joi.object({
     })
     .required(),
   phone: joi.string().min(9).max(11).required(),
-  email: joi.string().min(5).required().email(),
   image: joi
     .object({
       url: joi.string().min(14).allow("").optional(),
@@ -101,7 +99,9 @@ router.post("/login", async (req, res) => {
     if (user.lockUntil && user.lockUntil > Date.now()) {
       return res
         .status(403)
-        .send("Account is locked for 24 hours due to too many failed attempts.");
+        .send(
+          "Account is locked for 24 hours due to too many failed attempts.",
+        );
     }
 
     if (user.lockUntil && user.lockUntil <= Date.now()) {
@@ -109,7 +109,10 @@ router.post("/login", async (req, res) => {
       user.lockUntil = 0;
     }
 
-    const validPassword = await bcrypt.compare(req.body.password, user.password);
+    const validPassword = await bcrypt.compare(
+      req.body.password,
+      user.password,
+    );
 
     if (!validPassword) {
       user.loginAttempts = (user.loginAttempts || 0) + 1;
@@ -166,9 +169,18 @@ router.put("/:id", auth, async (req, res) => {
     const { error } = updateSchema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    }).select("-password");
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          name: req.body.name,
+          phone: req.body.phone,
+          image: req.body.image,
+          address: req.body.address,
+        },
+      },
+      { new: true },
+    ).select("-password");
     if (!user) return res.status(404).send("User not found.");
 
     res.send(user);
@@ -198,7 +210,9 @@ router.delete("/:id", auth, async (req, res) => {
     if (req.payload._id !== req.params.id && !req.payload.isAdmin) {
       return res.status(403).send("Access denied.");
     }
-    const user = await User.findByIdAndDelete(req.params.id).select("-password");
+    const user = await User.findByIdAndDelete(req.params.id).select(
+      "-password",
+    );
     if (!user) return res.status(404).send("User not found.");
     res.send(user);
   } catch (err) {

@@ -3,7 +3,6 @@ const router = express.Router();
 const joi = require("joi");
 const Card = require("../models/Card");
 const auth = require("../middleware/auth");
-const _ = require("lodash");
 
 const cardSchema = joi.object({
   title: joi.string().min(2).max(256).required(),
@@ -36,7 +35,8 @@ const bizNumberSchema = joi.object({
 
 const generateBizNumber = async () => {
   while (true) {
-    const random = _.random(1000000, 9999999);
+    const random =
+      Math.floor(Math.random() * (9999999 - 1000000 + 1)) + 1000000;
     const card = await Card.findOne({ bizNumber: random });
     if (!card) return random;
   }
@@ -97,16 +97,18 @@ router.put("/:id", auth, async (req, res) => {
     const { error } = cardSchema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const card = await Card.findOneAndUpdate(
-      { _id: req.params.id, user_id: req.payload._id },
-      req.body,
-      { new: true },
-    );
+    const card = await Card.findById(req.params.id);
+    if (!card) return res.status(404).send("Card not found.");
 
-    if (!card)
-      return res.status(404).send("Card not found or you are not the owner.");
+    if (card.user_id.toString() !== req.payload._id) {
+      return res.status(403).send("Access denied.");
+    }
 
-    res.send(card);
+    const updatedCard = await Card.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
+    res.send(updatedCard);
   } catch (err) {
     res.status(500).send("Server error");
   }

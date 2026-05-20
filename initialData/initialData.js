@@ -86,12 +86,7 @@ const initialData = async () => {
     }));
 
     await Card.insertMany(sampleCards);
-
     console.log("Initial data created successfully");
-    console.log(`  Regular:  ${regularUser.email}`);
-    console.log(`  Business: ${businessUser.email}`);
-    console.log(`  Admin:    ${adminUser.email}`);
-    console.log("  Password: Aa123456!");
   } catch (err) {
     console.error("Initial data error:", err.message);
   }
