@@ -15,6 +15,7 @@ A REST API server for the BCard business card management application, built with
 2. Create a `.env` file in the root directory:
 
 ```
+   NODE_ENV=development
    PORT=8000
    DB=your_mongodb_connection_string
    JWTKEY=your_secret_key
